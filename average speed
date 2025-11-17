@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平均速率練習</title>
+    <style>
+        /* 🎨 CSS 樣式 (與前次提供一致，略過詳細內容) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            color: #1a73e8;
+            margin-bottom: 30px;
+        }
+
+        main {
+            max-width: 900px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fcfcfc;
+        }
+
+        h2 {
+            color: #3c4043;
+            border-bottom: 2px solid #e8e8e8;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        /* 進度指示器樣式 */
+        #progress-area {
+            display: flex;
+            justify-content: flex-end; 
+            align-items: center;
+            background-color: #e3f2fd;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #0d47a1;
+        }
+
+        /* 導航區塊 */
+        #navigation-area {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        #start-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.1em;
+            margin-top: 15px;
+        }
+
+        #prev-button, #next-button {
+            background-color: #2196f3;
+            color: white;
+        }
+
+        #submit-quiz-button {
+            background-color: #f44336;
+            color: white;
+            margin-left: auto;
+        }
+        
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* 測驗表格樣式 */
+        #quiz-table {
+            width: 50%; 
+            border-collapse: collapse;
+            margin: 10px auto 30px auto; 
+            font-size: 0.95em;
+            table-layout: fixed;
+        }
+
+        #quiz-table th, #quiz-table td {
+            border: 1px solid #ccc;
+            padding: 8px 5px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        
+        .aux-header-item {
+            background-color: #e0e0e0; 
+            color: #333;
+            font-weight: bold;
+            text-align: left;
+            width: 30%; 
+        }
+        
+        .aux-header-trip {
+            background-color: #f0f0f0;
+            color: #1a73e8;
+            font-weight: bold;
+        }
+
+        /* 答案填寫區樣式 - 公式佈局 */
+        #answer-input-area {
+            background-color: #e6f0ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 25px;
+            border: 2px solid #1a73e8;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end; 
+        }
+        
+        #answer-input-area > div {
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
+            position: relative;
+        }
+        
+        /* 公式符號的樣式 */
+        .formula-symbol {
+            font-size: 2.5em;
+            font-weight: 300;
+            color: #1a73e8;
+            margin: 0 10px;
+            align-self: center; 
+            padding-bottom: 5px;
+        }
+
+        #answer-input-area label {
+            display: block;
+            font-weight: bold;
+            color: #1a73e8;
+            margin-bottom: 5px;
+            font-size: 0.9em; 
+        }
+
+        input[type="number"], input[type="text"] {
+            width: 90%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            text-align: center;
+            font-size: 1em;
+        }
+        
+        .question-text {
+            text-align: left;
+            font-size: 1.1em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        /* 結果區樣式 */
+        #result-area {
+            text-align: center;
+            background-color: #e8f5e9;
+            border-color: #4CAF50;
+            padding: 30px;
+            display: none; 
+        }
+        
+        .name-input-group {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .name-input-group input {
+            width: 50%;
+            font-size: 1.2em;
+            padding: 8px;
+        }
+        
+        /* 總分區域清晰 */
+        #final-score {
+            font-size: 2.5em;
+            color: #4CAF50; 
+            font-weight: bold;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🏃平均速率練習🏃</h1>
+        <p style="color: #4CAF50; font-weight: bold; margin-top: -15px; margin-bottom: 25px;">張雯秋老師設計</p>
+    </header>
+
+    <main>
+        
+        <section id="progress-area">
+            <div id="progress-indicator">請按開始測驗</div>
+        </section>
+
+        <section id="start-section" style="text-align: center;">
+            
+            <div class="name-input-group">
+                <label for="student-name" style="font-size: 1.2em; font-weight: bold; display: block; margin-bottom: 10px;">請輸入您的姓名：</label>
+                <input type="text" id="student-name" placeholder="姓名" required>
+            </div>
+            
+            <button onclick="startQuiz()" id="start-button">開始練習</button>
+        </section>
+
+        <section id="quiz-section" style="display: none;">
+            <div id="current-question-text" class="question-text"></div>
+            
+            
+            <table id="quiz-table">
+                <thead>
+                    <tr>
+                        <th class="aux-header-item"></th> 
+                        <th class="aux-header-trip">去程</th>
+                        <th class="aux-header-trip">回程</th>
+                    </tr>
+                </thead>
+                <tbody id="quiz-body">
+                    <tr>
+                        <td class="aux-header-item">距離 (km)</td>
+                        <td><input type="number" id="gD-input" min="0" step="0.01"></td> 
+                        <td><input type="number" id="bD-input" min="0" step="0.01"></td> 
+                    </tr>
+                    <tr>
+                        <td class="aux-header-item">時間 (hr)</td>
+                        <td><input type="number" id="gT-input" min="0" step="0.01"></td> 
+                        <td><input type="number" id="bT-input" min="0" step="0.01"></td> 
+                    </tr>
+                    <tr>
+                        <td class="aux-header-item">速率 (km/hr)</td>
+                        <td><input type="number" id="gR-input" min="0" step="0.01"></td> 
+                        <td><input type="number" id="bR-input" min="0" step="0.01"></td> 
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div id="answer-input-area">
+                
+                <div>
+                    <label for="dist-input">總距離 (公里)</label>
+                    <input type="number" id="dist-input" min="0" step="0.01">
+                </div>
+                
+                <div class="formula-symbol">÷</div>
+                
+                <div>
+                    <label for="time-input">總時間 (小時)</label>
+                    <input type="number" id="time-input" min="0" step="0.01">
+                </div>
+                
+                <div class="formula-symbol">=</div>
+                
+                <div>
+                    <label for="rate-input">平均速率 (公里/時)</label>
+                    <input type="number" id="rate-input" min="0" step="0.01">
+                </div>
+            </div>
+            
+            <div id="navigation-area">
+                <button id="prev-button" onclick="changeQuestion(-1)" disabled>上一題</button>
+                <button id="next-button" onclick="changeQuestion(1)">下一題</button>
+                <button id="submit-quiz-button" onclick="submitQuiz()" style="display: none;">提交並計分</button>
+            </div>
+        </section>
+        
+        <section id="result-area">
+            <h2>🎉 練習結果</h2>
+            <p>學生：<strong id="final-name">--</strong></p>
+            <p style="display: none;"><strong>作答時間：</strong> <span id="final-time">--</span></p> 
+            <p><strong>總得分 (滿分 100 分)：</strong></p>
+            <div id="final-score">0 分</div>
+            
+            <button onclick="window.location.reload()" style="margin-top: 20px; background-color: #2196f3;">重新練習</button>
+        </section>
+    </main>
+
+    <script>
+        // 🧠 JavaScript 邏輯：數據結構和控制邏輯 
+        const baseQuestions = [
+            {
+                id: 1, 
+                text: "1. 小華參加健行活動，去程12公里走了6小時，回程以時速6公里走原路回去，請問小華的平均速度是多少？",
+                ansDist: 24, ansTime: 8, ansRate: 3, 
+                auxAns: { gD: 12, gT: 6, gR: 2, bD: 12, bT: 2, bR: 6 }
+            },
+            {
+                id: 2, 
+                text: "2. 小華參加健行活動，去程6公里以時速2公里的速度行走，回程走原路花了1小時，請問小華的平均速度是多少？", 
+                ansDist: 12, ansTime: 4, ansRate: 3, 
+                auxAns: { gD: 6, gT: 3, gR: 2, bD: 6, bT: 1, bR: 6 } 
+            },
+            {
+                id: 3, 
+                text: "3. 小華參加健行活動，去程10公里走了6小時，回程走原路花了4小時，請問小華的平均速度是多少？",
+                ansDist: 20, ansTime: 10, ansRate: 2, // 20/10 = 2
+                auxAns: { gD: 10, gT: 6, gR: 1.6667, bD: 10, bT: 4, bR: 2.5 }
+            },
+            {
+                id: 4, 
+                text: "4. 小華參加健行活動，去程以時速5公里走了3小時，回程走原路花了2小時。請問小華的平均速度是多少？",
+                ansDist: 30, ansTime: 5, ansRate: 6, // 總距離 30 / 總時間 5 = 6
+                auxAns: { gD: 15, gT: 3, gR: 5, bD: 15, bT: 2, bR: 7.5 }
+            },
+            {
+                id: 5, 
+                text: "5. 小華參加健行活動，去程4公里花了5小時，回程繞遠路走了5公里卻花了4小時，請問小華的平均速度是多少？",
+                ansDist: 9, ansTime: 9, ansRate: 1, // 總距離 9 / 總時間 9 = 1
+                auxAns: { gD: 4, gT: 5, gR: 0.8, bD: 5, bT: 4, bR: 1.25 }
+            },
+            {
+                id: 6, 
+                text: "6. 小華參加健行活動，去程以時速5公里走2小時，回程走原路花了3小時，請問小華的平均速率是多少? ",
+                ansDist: 20, ansTime: 5, ansRate: 4, // 20/5 = 4
+                auxAns: { gD: 10, gT: 2, gR: 5, bD: 10, bT: 3, bR: 3.33 }
+            },
+            {
+                id: 7, 
+                text: "7. 小華參加健行活動，去程以時速6公里走2小時，回程走原路花了4小時，請問小華的平均速率是多少? ",
+                ansDist: 24, ansTime: 6, ansRate: 4, 
+                auxAns: { gD: 12, gT: 2, gR: 6, bD: 12, bT: 4, bR: 3 }
+            },
+            {
+                id: 8, 
+                text: "8. 小華參加健行活動，去程15公里以時速3公里的速度行走，回程走原路花了10小時，請問小華的平均速度是多少？",
+                ansDist: 30, ansTime: 15, ansRate: 2, 
+                auxAns: { gD: 15, gT: 5, gR: 3, bD: 15, bT: 10, bR: 1.5 }
+            }
+        ];
+        
+        let questions = []; 
+        let currentQuestionIndex = 0;
+        let quizAnswers = []; 
+        let studentName = '';
+        
+        const qTextEl = document.getElementById('current-question-text');
+        const startSection = document.getElementById('start-section');
+        const quizSection = document.getElementById('quiz-section');
+        const resultArea = document.getElementById('result-area');
+        const prevBtn = document.getElementById('prev-button');
+        const nextBtn = document.getElementById('next-button');
+        const submitBtn = document.getElementById('submit-quiz-button');
+        const progressEl = document.getElementById('progress-indicator');
+        const nameInput = document.getElementById('student-name');
+        const finalScoreEl = document.getElementById('final-score'); 
+
+        // Fisher-Yates 隨機排序算法
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // 啟動測驗
+        function startQuiz() {
+            studentName = nameInput.value.trim();
+            if (!studentName) {
+                alert("請先輸入您的姓名！");
+                return;
+            }
+
+            questions = [...baseQuestions]; 
+            shuffleArray(questions);
+            
+            quizAnswers = [];
+            questions.forEach(() => {
+                quizAnswers.push({});
+            });
+            
+            startSection.style.display = 'none';
+            quizSection.style.display = 'block';
+            resultArea.style.display = 'none';
+            
+            currentQuestionIndex = 0;
+            loadQuestion(currentQuestionIndex);
+        }
+
+        // 儲存當前題目答案
+        function saveCurrentAnswer() {
+            const currentQ = questions[currentQuestionIndex];
+            
+            quizAnswers[currentQuestionIndex] = {
+                gD: parseFloat(document.getElementById('gD-input').value) || 0,
+                gT: parseFloat(document.getElementById('gT-input').value) || 0,
+                gR: parseFloat(document.getElementById('gR-input').value) || 0,
+                bD: parseFloat(document.getElementById('bD-input').value) || 0,
+                bT: parseFloat(document.getElementById('bT-input').value) || 0,
+                bR: parseFloat(document.getElementById('bR-input').value) || 0,
+                
+                dist: parseFloat(document.getElementById('dist-input').value) || 0,
+                time: parseFloat(document.getElementById('time-input').value) || 0,
+                rate: parseFloat(document.getElementById('rate-input').value) || 0,
+                
+                ans: currentQ 
+            };
+        }
+
+        // 載入指定題號的問題
+        function loadQuestion(index) {
+            if (index < 0 || index >= questions.length) return;
+
+            const q = questions[index];
+            qTextEl.textContent = `${index + 1}. ${q.text.substring(q.text.indexOf('.') + 1)}`;
+            
+            progressEl.textContent = `第 ${index + 1} 題 / 共 ${questions.length} 題`;
+
+            const savedAns = quizAnswers[index];
+            
+            document.getElementById('gD-input').value = savedAns.gD || '';
+            document.getElementById('gT-input').value = savedAns.gT || '';
+            document.getElementById('gR-input').value = savedAns.gR || '';
+            document.getElementById('bD-input').value = savedAns.bD || '';
+            document.getElementById('bT-input').value = savedAns.bT || '';
+            document.getElementById('bR-input').value = savedAns.bR || '';
+            
+            document.getElementById('dist-input').value = savedAns.dist || '';
+            document.getElementById('time-input').value = savedAns.time || '';
+            document.getElementById('rate-input').value = savedAns.rate || '';
+            
+            updateNavigationButtons(index);
+        }
+
+        function updateNavigationButtons(index) {
+            prevBtn.disabled = (index === 0);
+            
+            if (index === questions.length - 1) {
+                nextBtn.style.display = 'none';
+                submitBtn.style.display = 'block';
+            } else {
+                nextBtn.style.display = 'block';
+                submitBtn.style.display = 'none';
+                nextBtn.disabled = false;
+            }
+        }
+
+        function changeQuestion(direction) {
+            saveCurrentAnswer();
+
+            currentQuestionIndex += direction;
+            loadQuestion(currentQuestionIndex);
+        }
+
+        // 提交測驗並計分
+        function submitQuiz() {
+            saveCurrentAnswer();
+            
+            quizSection.style.display = 'none';
+            resultArea.style.display = 'block';
+            document.getElementById('final-name').textContent = studentName;
+
+            let totalRawScore = 0;
+            const tolerance = 0.01; 
+            const MAX_RAW_SCORE = questions.length * 10; // 8 題 * 10 分/題 = 80 分
+
+            quizAnswers.forEach(stuAns => {
+                const q = stuAns.ans; 
+                let score = 0;
+                
+                const ansDist = Math.round(q.ansDist * 100) / 100;
+                const ansTime = Math.round(q.ansTime * 100) / 100;
+                const ansRate = Math.round(q.ansRate * 100) / 100;
+                
+                // 計分：總距離(3分) + 總時間(3分) + 平均速率(4分) = 10分
+                if (Math.abs(stuAns.dist - ansDist) < tolerance) { score += 3; }
+                if (Math.abs(stuAns.time - ansTime) < tolerance) { score += 3; }
+                if (Math.abs(stuAns.rate - ansRate) < tolerance) { score += 4; }
+                
+                totalRawScore += score;
+            });
+            
+            let finalScaledScore = (totalRawScore / MAX_RAW_SCORE) * 100;
+            finalScaledScore = Math.round(finalScaledScore * 100) / 100; 
+
+            finalScoreEl.textContent = `${finalScaledScore} 分`;
+        }
+    </script>
+</body>
+</html>
